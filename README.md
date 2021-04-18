@@ -43,6 +43,6 @@ docker run \
 
 ### Releasing new Docker image
 ```
-docker build -t devingen/sepet-cdn:0.0.1 .
-docker push devingen/sepet-cdn:0.0.1
+docker build -t devingen/sepet-cdn:0.0.2 .
+docker push devingen/sepet-cdn:0.0.2
 ```

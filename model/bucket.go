@@ -68,6 +68,10 @@ type Bucket struct {
 
 	// Status determines the bucket status. Should be one of 'active' ... (Not active status is not supported yet)
 	Status *string `json:"status,omitempty" bson:"status,omitempty"`
+
+	// CORSConfigs contains the CORS header configuration. Each config in the array
+	// is supposed the be used for different rules for different origins.
+	CORSConfigs *[]CORSConfig `json:"corsConfigs,omitempty" bson:"corsConfigs,omitempty"`
 }
 
 // AddCreationFields adds the necessary fields before inserting into database
@@ -85,4 +89,12 @@ func (b *Bucket) PrepareUpdateFields() {
 	b.Revision = 0
 	now := time.Now()
 	b.UpdatedAt = &now
+}
+
+type CORSConfig struct {
+	AllowedHeaders *[]string `json:"allowedHeaders,omitempty" bson:"allowedHeaders,omitempty"`
+	AllowedMethods *[]string `json:"allowedMethods,omitempty" bson:"allowedMethods,omitempty"`
+	AllowedOrigins *[]string `json:"allowedOrigins,omitempty" bson:"allowedOrigins,omitempty"`
+	ExposeHeaders  *[]string `json:"exposeHeaders,omitempty" bson:"exposeHeaders,omitempty"`
+	MaxAgeSeconds  *string   `json:"maxAgeSeconds,omitempty" bson:"maxAgeSeconds,omitempty"`
 }

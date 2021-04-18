@@ -12,6 +12,7 @@ import (
 	"github.com/devingen/sepet-cdn/model"
 	"github.com/sirupsen/logrus"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
@@ -69,6 +70,7 @@ func (sc ServiceController) GetFile(w http.ResponseWriter, r *http.Request) {
 		if hasCache {
 			logElapsedTime(logger, startTime, true, fileMeta.ContentLength)
 
+			setCorsHeadersForOrigin(w, r.Header.Get("Origin"), bucket)
 			http.ServeContent(w, r, filePath, fileMeta.LastModified.UTC(), bytes.NewReader(fileContent))
 			return
 		}
@@ -88,6 +90,7 @@ func (sc ServiceController) GetFile(w http.ResponseWriter, r *http.Request) {
 				if hasCache {
 					logElapsedTime(logger, startTime, true, fileMeta.ContentLength)
 
+					setCorsHeadersForOrigin(w, r.Header.Get("Origin"), bucket)
 					http.ServeContent(w, r, filePath, fileMeta.LastModified.UTC(), bytes.NewReader(fileContent))
 					return
 				}
@@ -121,6 +124,7 @@ func (sc ServiceController) GetFile(w http.ResponseWriter, r *http.Request) {
 
 	logElapsedTime(logger, startTime, false, fileMeta.ContentLength)
 
+	setCorsHeadersForOrigin(w, r.Header.Get("Origin"), bucket)
 	http.ServeContent(w, r, filePath, fileMeta.LastModified.UTC(), bytes.NewReader(fileContent))
 }
 
@@ -166,4 +170,57 @@ func logElapsedTime(logger *logrus.Entry, startTime time.Time, fromCache bool, f
 		"from-cache":    fromCache,
 		"size":          *fileSize,
 	}).Debug("served")
+}
+
+func setCorsHeadersForOrigin(w http.ResponseWriter, origin string, bucket *model.Bucket) {
+	if bucket.CORSConfigs == nil {
+		return
+	}
+	corsConfigs := *bucket.CORSConfigs
+
+	hasConfigForOrigin := false
+	hasConfigForAllOrigins := false
+
+	var configForOrigin model.CORSConfig
+	var configForAllOrigins model.CORSConfig
+	for _, corsConfig := range corsConfigs {
+		if contains(*corsConfig.AllowedOrigins, origin) {
+			configForOrigin = corsConfig
+			hasConfigForOrigin = true
+		}
+
+		if contains(*corsConfig.AllowedOrigins, "*") {
+			configForAllOrigins = corsConfig
+			hasConfigForAllOrigins = true
+		}
+	}
+
+	if hasConfigForOrigin {
+		setCorsHeaders(w, configForOrigin)
+	} else if hasConfigForAllOrigins {
+		setCorsHeaders(w, configForAllOrigins)
+	}
+}
+
+func setCorsHeaders(w http.ResponseWriter, config model.CORSConfig) {
+	if config.AllowedOrigins != nil {
+		w.Header().Set("Access-Control-Allow-Origin", strings.Join(*config.AllowedOrigins, ","))
+	}
+	if config.AllowedMethods != nil {
+		w.Header().Set("Access-Control-Allow-Methods", strings.Join(*config.AllowedMethods, ","))
+	}
+	if config.AllowedHeaders != nil {
+		w.Header().Set("Access-Control-Allow-Headers", strings.Join(*config.AllowedHeaders, ","))
+	}
+	if config.ExposeHeaders != nil {
+		w.Header().Set("Access-Control-Expose-Headers", strings.Join(*config.ExposeHeaders, ","))
+	}
+	if config.MaxAgeSeconds != nil {
+		w.Header().Set("Access-Control-Max-Age", *config.MaxAgeSeconds)
+	}
+}
+
+func contains(s []string, searchterm string) bool {
+	i := sort.SearchStrings(s, searchterm)
+	return i < len(s) && s[i] == searchterm
 }

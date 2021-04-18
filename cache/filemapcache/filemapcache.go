@@ -102,15 +102,17 @@ func (mc *FileMapCache) Invalidate(buckets []*model.Bucket) {
 
 	mc.metaCache.Range(func(key, value interface{}) bool {
 		for prefix := range pathPrefixesToKeep {
-			if strings.Index(key.(string), prefix) != 0 {
-				mc.logger.WithFields(logrus.Fields{
-					"path": key,
-				}).Debug("removing-file-from-cache")
-
-				mc.metaCache.Delete(key)
-				mc.contentCache.Delete(key)
+			if strings.Index(key.(string), prefix) == 0 {
+				// keep the file
+				return true
 			}
 		}
+		mc.logger.WithFields(logrus.Fields{
+			"path": key,
+		}).Debug("removing-file-from-cache")
+
+		mc.metaCache.Delete(key)
+		mc.contentCache.Delete(key)
 		return true
 	})
 }
