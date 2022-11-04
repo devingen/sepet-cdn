@@ -72,6 +72,9 @@ type Bucket struct {
 	// CORSConfigs contains the CORS header configuration. Each config in the array
 	// is supposed the be used for different rules for different origins.
 	CORSConfigs *[]CORSConfig `json:"corsConfigs,omitempty" bson:"corsConfigs,omitempty"`
+
+	// ResponseHeaders contains the headers returned to all get file responses from CDN.
+	ResponseHeaders *map[string]string `json:"responseHeaders,omitempty" bson:"responseHeaders,omitempty"`
 }
 
 // AddCreationFields adds the necessary fields before inserting into database

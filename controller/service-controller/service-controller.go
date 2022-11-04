@@ -3,6 +3,7 @@ package srvcont
 import (
 	"bytes"
 	"context"
+	"github.com/aws/aws-sdk-go/service/s3"
 	core "github.com/devingen/api-core"
 	"github.com/devingen/api-core/log"
 	"github.com/devingen/sepet-cdn/cache"
@@ -71,7 +72,8 @@ func (sc ServiceController) GetFile(w http.ResponseWriter, r *http.Request) {
 			logElapsedTime(logger, startTime, true, fileMeta.ContentLength)
 
 			setCorsHeadersForOrigin(w, r.Header.Get("Origin"), bucket)
-			http.ServeContent(w, r, filePath, fileMeta.LastModified.UTC(), bytes.NewReader(fileContent))
+			setResponseHeaders(w, bucket)
+			http.ServeContent(w, r, filePath, pickLastModified(bucket, fileMeta), bytes.NewReader(fileContent))
 			return
 		}
 	}
@@ -91,7 +93,8 @@ func (sc ServiceController) GetFile(w http.ResponseWriter, r *http.Request) {
 					logElapsedTime(logger, startTime, true, fileMeta.ContentLength)
 
 					setCorsHeadersForOrigin(w, r.Header.Get("Origin"), bucket)
-					http.ServeContent(w, r, filePath, fileMeta.LastModified.UTC(), bytes.NewReader(fileContent))
+					setResponseHeaders(w, bucket)
+					http.ServeContent(w, r, filePath, pickLastModified(bucket, fileMeta), bytes.NewReader(fileContent))
 					return
 				}
 			}
@@ -125,7 +128,8 @@ func (sc ServiceController) GetFile(w http.ResponseWriter, r *http.Request) {
 	logElapsedTime(logger, startTime, false, fileMeta.ContentLength)
 
 	setCorsHeadersForOrigin(w, r.Header.Get("Origin"), bucket)
-	http.ServeContent(w, r, filePath, fileMeta.LastModified.UTC(), bytes.NewReader(fileContent))
+	setResponseHeaders(w, bucket)
+	http.ServeContent(w, r, filePath, pickLastModified(bucket, fileMeta), bytes.NewReader(fileContent))
 }
 
 // GetBucketDomainNameFromHost returns the first subdomain
@@ -170,6 +174,24 @@ func logElapsedTime(logger *logrus.Entry, startTime time.Time, fromCache bool, f
 		"from-cache":    fromCache,
 		"size":          *fileSize,
 	}).Debug("served")
+}
+
+// Compares the bucket and file last update dates and returns the later one.
+func pickLastModified(bucket *model.Bucket, fileMeta *s3.GetObjectOutput) time.Time {
+
+	if bucket.UpdatedAt.UTC().Before(fileMeta.LastModified.UTC()) {
+		return fileMeta.LastModified.UTC()
+	}
+	return bucket.UpdatedAt.UTC()
+}
+
+func setResponseHeaders(w http.ResponseWriter, bucket *model.Bucket) {
+	if bucket.ResponseHeaders != nil {
+		headers := *bucket.ResponseHeaders
+		for headerName, headerValue := range headers {
+			w.Header().Set(headerName, headerValue)
+		}
+	}
 }
 
 func setCorsHeadersForOrigin(w http.ResponseWriter, origin string, bucket *model.Bucket) {
