@@ -5,10 +5,10 @@ import "time"
 // App defines the environment variable configuration for the whole app
 type App struct {
 	// Port is the port of the HTTP server.
-	Port string `envconfig:"cdn_port" default:"80"`
+	Port string `envconfig:"port" default:"80"`
 
 	// LogLevel defines the log level.
-	LogLevel string `envconfig:"cdn_log_level" default:"info"`
+	LogLevel string `envconfig:"log_level" default:"info"`
 
 	// DalUpdateInterval is the data refresh time interval.
 	DalUpdateInterval time.Duration `envconfig:"dal_update_interval" default:"1m"`
@@ -18,6 +18,9 @@ type App struct {
 
 	// ApiURL is the URL of the Sepet API to get buckets.
 	ApiURL string `envconfig:"api_url" required:"true"`
+
+	// ApiKey is the key for Sepet API to get buckets.
+	ApiKey string `envconfig:"api_key" default:""`
 
 	// S3 is the configuration of the S3 server.
 	S3 S3 `envconfig:"s3"`

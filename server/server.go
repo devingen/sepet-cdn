@@ -32,7 +32,7 @@ func New(appConfig config.App) *http.Server {
 		logger.Fatal(err)
 	}
 
-	dal, err := dalcache.New(ctx, fileCache, appConfig.ApiURL, appConfig.DalUpdateInterval)
+	dal, err := dalcache.New(ctx, fileCache, appConfig.ApiURL, appConfig.ApiKey, appConfig.DalUpdateInterval)
 	if err != nil {
 		logger.Fatal(err)
 	}

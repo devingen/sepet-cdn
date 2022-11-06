@@ -24,7 +24,7 @@ type DALCache struct {
 	apiURL     string
 }
 
-func New(ctx context.Context, fileCache cache.IFileCache, apiURL string, dalUpdateInterval time.Duration) (*DALCache, error) {
+func New(ctx context.Context, fileCache cache.IFileCache, apiURL, apiKey string, dalUpdateInterval time.Duration) (*DALCache, error) {
 	logger, err := log.Of(ctx)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func New(ctx context.Context, fileCache cache.IFileCache, apiURL string, dalUpda
 		context:    ctx,
 		logger:     logger,
 		FileCache:  fileCache,
-		HTTPClient: resty.New(),
+		HTTPClient: resty.New().SetHeader("api-key", apiKey),
 		apiURL:     apiURL,
 	}
 

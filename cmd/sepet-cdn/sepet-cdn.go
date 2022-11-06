@@ -11,7 +11,7 @@ import (
 func main() {
 
 	var appConfig config.App
-	err := envconfig.Process("sepet", &appConfig)
+	err := envconfig.Process("sepet_cdn", &appConfig)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
