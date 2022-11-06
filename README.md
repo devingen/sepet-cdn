@@ -25,16 +25,16 @@ docker run \
   --name sepet-cdn \
   -e SEPET_CDN_PORT=80 \
   -e SEPET_CDN_LOG_LEVEL=debug \
-  -e SEPET_DAL_UPDATE_INTERVAL=5s \
-  -e SEPET_CACHE_RESET_INTERVAL=1m \
-  -e SEPET_API_URL=http://localhost:1005 \
-  -e SEPET_S3_ENDPOINT=http://localhost:9000 \
-  -e SEPET_S3_ACCESS_KEY_ID=ACCESSKEYIDFORTHEFILESERVER \
-  -e SEPET_S3_SECRET_ACCESS_KEY=ACCESSKEYFORTHEFILESERVER \
-  -e SEPET_S3_REGION=region-of-the-cdn \
-  -e SEPET_S3_BUCKET=the-root-bucket-name-in-s3 \
-  -e SEPET_MONGO_URI=mongodb://complete.mongo.uri \
-  -e SEPET_MONGO_DATABASE=mongo-database-name \
+  -e SEPET_CDN_DAL_UPDATE_INTERVAL=5s \
+  -e SEPET_CDN_CACHE_RESET_INTERVAL=1m \
+  -e SEPET_CDN_API_URL=http://localhost:1005 \
+  -e SEPET_CDN_S3_ENDPOINT=http://localhost:9000 \
+  -e SEPET_CDN_S3_ACCESS_KEY_ID=ACCESSKEYIDFORTHEFILESERVER \
+  -e SEPET_CDN_S3_SECRET_ACCESS_KEY=ACCESSKEYFORTHEFILESERVER \
+  -e SEPET_CDN_S3_REGION=region-of-the-cdn \
+  -e SEPET_CDN_S3_BUCKET=the-root-bucket-name-in-s3 \
+  -e SEPET_CDN_MONGO_URI=mongodb://complete.mongo.uri \
+  -e SEPET_CDN_MONGO_DATABASE=mongo-database-name \
   -p 80:80 \
   devingen/sepet-cdn:VERSION_HERE
 ```
@@ -43,6 +43,6 @@ docker run \
 
 ### Releasing new Docker image
 ```
-docker build --platform linux/amd64 -t devingen/sepet-cdn:0.0.5 .
-docker push devingen/sepet-cdn:0.0.5
+docker build --platform linux/amd64 -t devingen/sepet-cdn:0.0.6 .
+docker push devingen/sepet-cdn:0.0.6
 ```
