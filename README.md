@@ -33,8 +33,6 @@ docker run \
   -e SEPET_CDN_S3_SECRET_ACCESS_KEY=ACCESSKEYFORTHEFILESERVER \
   -e SEPET_CDN_S3_REGION=region-of-the-cdn \
   -e SEPET_CDN_S3_BUCKET=the-root-bucket-name-in-s3 \
-  -e SEPET_CDN_MONGO_URI=mongodb://complete.mongo.uri \
-  -e SEPET_CDN_MONGO_DATABASE=mongo-database-name \
   -p 80:80 \
   devingen/sepet-cdn:VERSION_HERE
 ```
